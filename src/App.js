@@ -1,25 +1,55 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import newimg from './new.jpg';
+import icon from './icon.png';
 
 class App extends Component {
+  checkTime() {
+    let dingTime = new Date(2019, 1, 18, 16, 0, 0);
+    let nowTime = new Date();
+    if (nowTime >= dingTime) {
+      console.log('dingdingdingggg');
+      this.handleNotify();
+    } else {
+      console.log('not yet');
+      setTimeout(()=> this.checkTime(), 1000);
+    }
+  }
+  componentDidMount() {
+    if (Notification && Notification.permission === 'default') {
+      Notification.requestPermission(function (permission) {
+        if (!('permission' in Notification)) {
+          Notification.permission = permission;
+        }
+      });
+    }
+    this.checkTime();
+    // setTimeout(this.handleNotify, 3000);
+  }
+  handleNotify = (e) => {
+    function sendNotification(text) {
+      let notification = new Notification('Reminder:', {
+        icon: icon,
+        image: newimg,
+        body: text,
+        tag: 'DingDing',
+      });
+      notification.onclick = function(e) {
+        e.preventDefault();
+        window.focus();
+        this.close();
+      }
+    }
+    if (Notification.permission === 'granted') {
+      let text = 'Time to workout!';
+      sendNotification(text);
+    }
+    
+  }
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <button onClick={this.handleNotify}>Notify</button>
       </div>
     );
   }
